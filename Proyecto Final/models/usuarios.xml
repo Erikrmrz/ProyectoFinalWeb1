@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<usuarios>
+    <usuario>
+        <id>1</id>
+        <username>erik_admin</username>
+        <password>admin123</password>
+        <rol>administrador</rol>
+    </usuario>
+    <usuario>
+        <id>2</id>
+        <username>empleado1</username>
+        <password>emp123</password>
+        <rol>empleado</rol>
+    </usuario>
+    <usuario>
+        <id>3</id>
+        <username>cliente1</username>
+        <password>cine123</password>
+        <rol>cliente</rol>
+    </usuario>
+</usuarios>
