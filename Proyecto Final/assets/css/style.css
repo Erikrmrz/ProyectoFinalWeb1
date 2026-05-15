@@ -1110,3 +1110,593 @@ body {
     color: #0b1e36;
     background: var(--accent);
 }
+
+.horario-btn small {
+    display: block;
+    font-size: 0.7rem;
+    opacity: 0.7;
+    margin-top: 2px;
+}
+
+/* Hacer que horario-btn funcione como link */
+a.horario-btn {
+    text-decoration: none;
+    text-align: center;
+}
+
+/* =========================================
+   PÁGINA DE SELECCIÓN DE ASIENTOS
+   ========================================= */
+.seats-page {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 30px 20px;
+}
+
+.seats-info-panel {
+    display: flex;
+    gap: 24px;
+    margin-bottom: 30px;
+    align-items: flex-start;
+}
+
+.seats-poster {
+    width: 140px;
+    height: 200px;
+    object-fit: cover;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    flex-shrink: 0;
+}
+
+.seats-details h1 {
+    font-size: 1.5rem;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.seats-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    font-size: 0.95rem;
+    color: var(--text-secondary);
+}
+
+.seats-meta span {
+    background: var(--bg-card);
+    padding: 6px 14px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border-card);
+}
+
+/* Indicador de pantalla */
+.screen-indicator {
+    background: linear-gradient(180deg, var(--accent), transparent);
+    color: #0b1e36;
+    text-align: center;
+    padding: 8px;
+    border-radius: 6px 6px 50% 50%;
+    font-weight: 700;
+    font-size: 0.85rem;
+    letter-spacing: 4px;
+    margin: 0 auto 30px;
+    max-width: 500px;
+    opacity: 0.8;
+}
+
+/* Grid de asientos */
+.seats-grid-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    align-items: center;
+    margin-bottom: 24px;
+}
+
+.seats-row {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+}
+
+.row-label {
+    width: 24px;
+    text-align: center;
+    font-weight: 700;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}
+
+.seat {
+    width: 36px;
+    height: 36px;
+    border-radius: 6px 6px 10px 10px;
+    border: 2px solid transparent;
+    font-size: 0.75rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.seat.available {
+    background: var(--bg-card);
+    border-color: var(--border-card);
+    color: var(--text-secondary);
+}
+
+.seat.available:hover {
+    border-color: var(--accent);
+    background: rgba(251, 211, 4, 0.15);
+    transform: scale(1.1);
+}
+
+.seat.selected {
+    background: var(--accent);
+    border-color: var(--accent-hover);
+    color: #0b1e36;
+    transform: scale(1.05);
+    box-shadow: 0 0 10px rgba(251, 211, 4, 0.4);
+}
+
+.seat.occupied {
+    background: var(--danger);
+    border-color: var(--danger);
+    color: rgba(255, 255, 255, 0.5);
+    cursor: not-allowed;
+    opacity: 0.5;
+}
+
+/* Leyenda */
+.seats-legend {
+    display: flex;
+    justify-content: center;
+    gap: 24px;
+    margin-bottom: 24px;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+}
+
+.seats-legend span {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.seat-sample {
+    width: 20px;
+    height: 20px;
+    border-radius: 4px 4px 6px 6px;
+    display: inline-block;
+}
+
+.seat-sample.available {
+    background: var(--bg-card);
+    border: 2px solid var(--border-card);
+}
+
+.seat-sample.selected {
+    background: var(--accent);
+}
+
+.seat-sample.occupied {
+    background: var(--danger);
+    opacity: 0.5;
+}
+
+/* Resumen de compra */
+.seats-summary {
+    background: var(--bg-card);
+    border: 1px solid var(--border-card);
+    border-radius: var(--radius);
+    padding: 20px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    box-shadow: var(--shadow-sm);
+}
+
+.summary-text {
+    display: flex;
+    gap: 24px;
+    font-size: 0.95rem;
+    color: var(--text-secondary);
+}
+
+.summary-text strong {
+    color: var(--accent);
+}
+
+.btn-comprar-boleto {
+    white-space: nowrap;
+    min-width: 200px;
+}
+
+.alert-error {
+    background: rgba(229, 62, 62, 0.12);
+    color: #fc8181;
+    border: 1px solid rgba(229, 62, 62, 0.3);
+    border-radius: var(--radius-sm);
+    padding: 12px 16px;
+    font-size: 0.875rem;
+    margin-bottom: 20px;
+}
+
+[data-theme="light"] .alert-error {
+    color: var(--danger);
+    background: #fff5f5;
+    border-color: #feb2b2;
+}
+
+/* =========================================
+   PÁGINA DE CONFIRMACIÓN / TICKET
+   ========================================= */
+.confirmation-page {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: calc(100vh - 64px);
+    padding: 30px 20px;
+}
+
+.ticket-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-card);
+    border-radius: var(--radius);
+    max-width: 480px;
+    width: 100%;
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    animation: fadeIn 0.4s ease;
+}
+
+.ticket-header {
+    background: linear-gradient(135deg, var(--success), #2f855a);
+    padding: 30px;
+    text-align: center;
+    color: #fff;
+}
+
+.ticket-success-icon {
+    font-size: 3rem;
+    margin-bottom: 8px;
+}
+
+.ticket-header h1 {
+    font-size: 1.5rem;
+    margin-bottom: 4px;
+}
+
+.ticket-header p {
+    opacity: 0.85;
+    font-size: 0.9rem;
+}
+
+.ticket-body {
+    padding: 24px;
+}
+
+.ticket-detail {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border-card);
+    font-size: 0.9rem;
+}
+
+.ticket-detail:last-child {
+    border-bottom: none;
+}
+
+.ticket-detail .label {
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+.ticket-detail .value {
+    color: var(--text-primary);
+    font-weight: 600;
+    text-align: right;
+}
+
+.ticket-total {
+    color: var(--accent) !important;
+    font-size: 1.2rem !important;
+}
+
+.ticket-qr {
+    text-align: center;
+    padding: 20px;
+    border-top: 2px dashed var(--border-card);
+}
+
+.ticket-qr p {
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    margin-bottom: 12px;
+}
+
+.qr-image {
+    border-radius: 8px;
+    background: #fff;
+    padding: 8px;
+}
+
+.ticket-actions {
+    padding: 0 24px 24px;
+}
+
+/* =========================================
+   ADMIN: TABS DE NAVEGACIÓN
+   ========================================= */
+.admin-tabs {
+    display: flex;
+    background: var(--bg-secondary);
+    border-bottom: 1px solid var(--border-card);
+    padding: 0 28px;
+    gap: 0;
+}
+
+.admin-tab {
+    padding: 14px 24px;
+    text-decoration: none;
+    color: var(--text-secondary);
+    font-weight: 500;
+    font-size: 0.9rem;
+    border-bottom: 3px solid transparent;
+    transition: all var(--transition);
+}
+
+.admin-tab:hover {
+    color: var(--text-primary);
+    background: rgba(251, 211, 4, 0.05);
+}
+
+.admin-tab.active {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+    font-weight: 700;
+}
+
+/* =========================================
+   ADMIN: FORMULARIOS
+   ========================================= */
+.admin-form-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-card);
+    border-radius: var(--radius);
+    padding: 24px;
+    box-shadow: var(--shadow-sm);
+}
+
+.admin-form-card h3 {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--accent);
+    margin-bottom: 16px;
+}
+
+.form-row {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 12px;
+}
+
+.form-row .form-group {
+    flex: 1;
+}
+
+.admin-form-card select {
+    width: 100%;
+    padding: 11px 14px;
+    border: 1px solid var(--input-border);
+    border-radius: var(--radius-sm);
+    background: var(--input-bg);
+    color: var(--text-primary);
+    font-size: 0.9rem;
+    font-family: inherit;
+    transition: border-color var(--transition);
+    outline: none;
+}
+
+.admin-form-card select:focus {
+    border-color: var(--accent);
+}
+
+.file-input {
+    width: 100%;
+    padding: 10px;
+    border: 2px dashed var(--border-card);
+    border-radius: var(--radius-sm);
+    background: var(--input-bg);
+    color: var(--text-primary);
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: border-color var(--transition);
+}
+
+.file-input:hover {
+    border-color: var(--accent);
+}
+
+/* =========================================
+   HISTORIAL
+   ========================================= */
+.historial-page {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 30px 20px;
+    min-height: calc(100vh - 64px);
+}
+
+.historial-page h1 {
+    font-size: 1.8rem;
+    margin-bottom: 20px;
+}
+
+.historial-tabs {
+    display: flex;
+    gap: 0;
+    margin-bottom: 24px;
+    border-bottom: 2px solid var(--border-card);
+}
+
+.htab {
+    padding: 12px 24px;
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+    font-weight: 500;
+    cursor: pointer;
+    border-bottom: 3px solid transparent;
+    margin-bottom: -2px;
+    transition: all var(--transition);
+    font-family: inherit;
+}
+
+.htab:hover {
+    color: var(--text-primary);
+}
+
+.htab.active {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+    font-weight: 700;
+}
+
+.historial-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-card);
+    border-radius: var(--radius);
+    padding: 20px;
+    margin-bottom: 14px;
+    transition: border-color var(--transition);
+}
+
+.historial-card:hover {
+    border-color: var(--accent);
+}
+
+.historial-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 10px;
+}
+
+.historial-card-header h3 {
+    font-size: 1rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.historial-date {
+    color: var(--text-muted);
+    font-size: 0.8rem;
+    white-space: nowrap;
+}
+
+.historial-card-body {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    align-items: center;
+}
+
+.historial-total {
+    color: var(--accent);
+    font-weight: 700;
+    font-size: 1.1rem;
+    margin-left: auto;
+}
+
+.historial-card-qr {
+    margin-top: 12px;
+}
+
+.btn-ver-qr {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-card);
+    color: var(--text-primary);
+    padding: 6px 14px;
+    border-radius: var(--radius-sm);
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: all var(--transition);
+    font-family: inherit;
+}
+
+.btn-ver-qr:hover {
+    border-color: var(--accent);
+    background: rgba(251, 211, 4, 0.1);
+}
+
+.qr-container {
+    margin-top: 10px;
+    text-align: center;
+}
+
+.qr-image-small {
+    border-radius: 8px;
+    background: #fff;
+    padding: 6px;
+}
+
+.historial-empty {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--text-muted);
+    font-size: 1rem;
+}
+
+/* =========================================
+   RESPONSIVE: ASIENTOS
+   ========================================= */
+@media (max-width: 700px) {
+    .seats-info-panel {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+
+    .seats-details h1 {
+        justify-content: center;
+    }
+
+    .seats-meta {
+        justify-content: center;
+    }
+
+    .seat {
+        width: 30px;
+        height: 30px;
+        font-size: 0.65rem;
+    }
+
+    .seats-summary {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .summary-text {
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .form-row {
+        flex-direction: column;
+    }
+}

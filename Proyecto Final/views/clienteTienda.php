@@ -1,13 +1,15 @@
 <?php
 session_start();
 require_once '../config/database.php';
+require_once '../helpers/xml_helper.php';
 
 $isLoggedIn = isset($_SESSION['rol']) && $_SESSION['rol'] === 'cliente';
 $username   = $isLoggedIn ? htmlspecialchars($_SESSION['username']) : 'Invitado';
 
-// Obtener productos desde la base de datos
-$stmt     = $conexion->query("SELECT * FROM productos ORDER BY nombre ASC");
-$productos = $stmt->fetchAll(PDO::FETCH_ASSOC);
+// Obtener productos desde la BD y convertir a XML
+$stmt      = $conexion->query("SELECT * FROM productos ORDER BY nombre ASC");
+$prodArray = $stmt->fetchAll(PDO::FETCH_ASSOC);
+$xmlProductos = productosToXML($prodArray);
 ?>
 <!DOCTYPE html>
 <html lang="es" data-theme="dark">
@@ -15,14 +17,23 @@ $productos = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Dulcería Cinépolis - Antoja algo delicioso antes de la función">
-    <title>Dulcería Cinépolis</title>
+    <title>Dulcería - Cinépolis</title>
     <link rel="stylesheet" href="../assets/css/style.css">
 </head>
 <body>
 
-<!-- HEADER -->
-<header class="app-header">
-    <a href="clienteTienda.php" class="logo">Cinépolis <span>Dulcería</span></a>
+<!-- HEADER UNIFICADO (mismo estilo que cartelera) -->
+<header class="app-header cine-navbar">
+    <div class="nav-left">
+        <a href="cartelera.php" class="logo-cinepolis">cinépolis</a>
+        <nav class="main-menu">
+            <a href="cartelera.php" class="menu-link">Películas</a>
+            <a href="clienteTienda.php" class="menu-link active">Alimentos</a>
+            <?php if ($isLoggedIn): ?>
+                <a href="historial.php" class="menu-link">Historial</a>
+            <?php endif; ?>
+        </nav>
+    </div>
     <div class="header-actions">
         <span class="header-user">Hola, <?= $username ?></span>
         <div class="theme-switch-wrapper">
@@ -42,21 +53,21 @@ $productos = $stmt->fetchAll(PDO::FETCH_ASSOC);
 <!-- LAYOUT PRINCIPAL -->
 <div class="store-layout">
 
-    <!-- ÁREA DE PRODUCTOS -->
+    <!-- ÁREA DE PRODUCTOS (iterando sobre XML) -->
     <div class="products-area">
         <h2>🍿 Elige tu antojo</h2>
         <div class="grid-productos">
-            <?php foreach ($productos as $prod): ?>
+            <?php foreach ($xmlProductos->producto as $prod): ?>
             <div class="card-producto">
-                <img src="../assets/img/<?= htmlspecialchars($prod['imagen']) ?>"
-                     alt="<?= htmlspecialchars($prod['nombre']) ?>"
+                <img src="<?= $prod->imagen_src ?>"
+                     alt="<?= $prod->nombre ?>"
                      onerror="this.src='https://via.placeholder.com/300x160/1a365d/fbd304?text=🍿'">
                 <div class="card-body">
-                    <h3><?= htmlspecialchars($prod['nombre']) ?></h3>
-                    <div class="precio">$<?= number_format($prod['precio'], 2) ?></div>
-                    <div class="stock-info">Disponibles: <?= $prod['stock'] ?> uds.</div>
+                    <h3><?= $prod->nombre ?></h3>
+                    <div class="precio">$<?= number_format((float)$prod->precio, 2) ?></div>
+                    <div class="stock-info">Disponibles: <?= $prod->stock ?> uds.</div>
                     <button class="btn-agregar"
-                        onclick="agregarAlCarrito(<?= $prod['id'] ?>, '<?= htmlspecialchars(addslashes($prod['nombre'])) ?>', <?= $prod['precio'] ?>, <?= $prod['stock'] ?>)">
+                        onclick="agregarAlCarrito(<?= $prod->id ?>, '<?= addslashes($prod->nombre) ?>', <?= $prod->precio ?>, <?= $prod->stock ?>)">
                         + Agregar al carrito
                     </button>
                 </div>
@@ -90,9 +101,7 @@ $productos = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
             <form id="form-pago" action="../controllers/PagarController.php" method="POST">
                 <input type="hidden" name="carrito" id="carrito-input">
-                <button type="button" class="btn-pagar" onclick="procesarPago()">
-                    💳 Pagar Ahora
-                </button>
+                <button type="button" class="btn-pagar" onclick="procesarPago()">💳 Pagar Ahora</button>
             </form>
             <button class="btn-vaciar" onclick="vaciarCarrito()">Vaciar carrito</button>
         </div>
@@ -110,26 +119,19 @@ function renderCarrito() {
     const countEl    = document.getElementById('cart-count');
 
     if (carrito.length === 0) {
-        contenedor.innerHTML = `
-            <div class="carrito-vacio">
-                <div class="cart-icon-empty">🛒</div>
-                <span>Tu carrito está vacío.<br>¡Agrega algo delicioso!</span>
-            </div>`;
+        contenedor.innerHTML = `<div class="carrito-vacio"><div class="cart-icon-empty">🛒</div><span>Tu carrito está vacío.<br>¡Agrega algo delicioso!</span></div>`;
         totalEl.textContent = '$0.00';
         countEl.textContent = '0';
         return;
     }
 
-    let total = 0;
-    let totalItems = 0;
-    let html = '';
-
+    let total = 0, totalItems = 0, html = '';
     carrito.forEach((item, idx) => {
         const subtotal = item.precio * item.cantidad;
-        total      += subtotal;
+        total += subtotal;
         totalItems += item.cantidad;
         html += `
-        <div class="carrito-item" id="item-${idx}">
+        <div class="carrito-item">
             <div class="item-info">
                 <div class="item-nombre">${item.nombre}</div>
                 <div class="item-precio">$${item.precio.toFixed(2)} c/u</div>
@@ -145,7 +147,6 @@ function renderCarrito() {
             </div>
         </div>`;
     });
-
     contenedor.innerHTML = html;
     totalEl.textContent  = '$' + total.toFixed(2);
     countEl.textContent  = totalItems;
@@ -155,12 +156,8 @@ function renderCarrito() {
 function agregarAlCarrito(id, nombre, precio, stock) {
     const idx = carrito.findIndex(i => i.id === id);
     if (idx > -1) {
-        if (carrito[idx].cantidad < stock) {
-            carrito[idx].cantidad++;
-        } else {
-            alert('No hay más unidades disponibles.');
-            return;
-        }
+        if (carrito[idx].cantidad < stock) carrito[idx].cantidad++;
+        else { alert('No hay más unidades disponibles.'); return; }
     } else {
         carrito.push({ id, nombre, precio, cantidad: 1 });
     }
@@ -173,51 +170,28 @@ function cambiarCantidad(idx, delta) {
     renderCarrito();
 }
 
-function eliminarItem(idx) {
-    carrito.splice(idx, 1);
-    renderCarrito();
-}
-
-function vaciarCarrito() {
-    if (carrito.length === 0) return;
-    if (confirm('¿Vaciar el carrito?')) {
-        carrito = [];
-        renderCarrito();
-    }
-}
+function eliminarItem(idx)  { carrito.splice(idx, 1); renderCarrito(); }
+function vaciarCarrito()    { if (carrito.length && confirm('¿Vaciar el carrito?')) { carrito = []; renderCarrito(); } }
 
 function procesarPago() {
     if (carrito.length === 0) { alert('Tu carrito está vacío.'); return; }
-    if (!IS_LOGGED_IN) {
-        window.location.href = 'login.php?redirect=clienteTienda.php';
-    } else {
-        document.getElementById('carrito-input').value = JSON.stringify(carrito);
-        document.getElementById('form-pago').submit();
-    }
+    if (!IS_LOGGED_IN) { window.location.href = 'login.php?redirect=clienteTienda.php'; }
+    else { document.getElementById('carrito-input').value = JSON.stringify(carrito); document.getElementById('form-pago').submit(); }
 }
 
-/* --- Tema claro/oscuro --- */
+/* Tema */
 const toggle = document.getElementById('themeToggle');
 const html   = document.documentElement;
 const saved  = localStorage.getItem('theme') || 'dark';
 html.setAttribute('data-theme', saved);
 toggle.checked = (saved === 'light');
+toggle.addEventListener('change', () => { const t = toggle.checked ? 'light' : 'dark'; html.setAttribute('data-theme', t); localStorage.setItem('theme', t); });
 
-toggle.addEventListener('change', () => {
-    const t = toggle.checked ? 'light' : 'dark';
-    html.setAttribute('data-theme', t);
-    localStorage.setItem('theme', t);
-});
-
-/* --- Vaciar localStorage si hubo compra exitosa --- */
 <?php if(isset($_GET['compra']) && $_GET['compra'] === 'exitosa'): ?>
-localStorage.removeItem('carrito');
-carrito = [];
+localStorage.removeItem('carrito'); carrito = [];
 <?php endif; ?>
 
-// Render inicial
 renderCarrito();
 </script>
-
 </body>
 </html>

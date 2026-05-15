@@ -48,7 +48,7 @@
             </form>
 
             <div class="login-footer">
-                <a href="clienteTienda.php">← Volver a la tienda sin iniciar sesión</a>
+                <a href="cartelera.php">← Volver a la cartelera sin iniciar sesión</a>
             </div>
         </div>
     </div>
