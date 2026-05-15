@@ -17,7 +17,7 @@ function productosToXML($productos) {
         $item->addChild('stock', $prod['stock']);
         // Si tiene BLOB, la URL apunta al controlador de imagen; si no, al archivo
         if (!empty($prod['imagen_blob'])) {
-            $item->addChild('imagen_src', '../controllers/ImagenController.php?tipo=producto&id=' . $prod['id']);
+            $item->addChild('imagen_src', htmlspecialchars('../controllers/ImagenController.php?tipo=producto&id=' . $prod['id']));
         } else {
             $item->addChild('imagen_src', '../assets/img/' . htmlspecialchars($prod['imagen'] ?? ''));
         }
@@ -37,7 +37,7 @@ function peliculasToXML($peliculas) {
         $item->addChild('clasificacion', htmlspecialchars($peli['clasificacion']));
         // Imagen: BLOB o archivo
         if (!empty($peli['imagen_blob'])) {
-            $item->addChild('imagen_src', '../controllers/ImagenController.php?tipo=pelicula&id=' . $peli['id']);
+            $item->addChild('imagen_src', htmlspecialchars('../controllers/ImagenController.php?tipo=pelicula&id=' . $peli['id']));
         } else {
             $item->addChild('imagen_src', '../assets/img/' . htmlspecialchars($peli['imagen'] ?? ''));
         }
