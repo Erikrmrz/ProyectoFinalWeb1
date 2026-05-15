@@ -12,6 +12,19 @@ $horarios = $conexion->query(
 
 // Lista de películas para el select
 $peliculas = $conexion->query("SELECT id, titulo FROM peliculas ORDER BY titulo")->fetchAll(PDO::FETCH_ASSOC);
+
+// Si se está editando, cargar el horario
+$editando = null;
+if (isset($_GET['editar'])) {
+    $stmtEdit = $conexion->prepare("SELECT * FROM horarios WHERE id = ?");
+    $stmtEdit->execute([(int)$_GET['editar']]);
+    $editando = $stmtEdit->fetch(PDO::FETCH_ASSOC);
+}
+
+$salas = [
+    'Sala 1' => 60, 'Sala 2' => 55, 'Sala 3' => 50,
+    'Sala 4' => 45, 'Sala 5' => 40
+];
 ?>
 <!DOCTYPE html>
 <html lang="es" data-theme="dark">
@@ -19,7 +32,7 @@ $peliculas = $conexion->query("SELECT id, titulo FROM peliculas ORDER BY titulo"
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin - Horarios | Cinépolis</title>
-    <link rel="stylesheet" href="../assets/css/style.css">
+    <link rel="stylesheet" href="../assets/css/style.css?v=2">
 </head>
 <body class="panel-layout">
 
@@ -48,28 +61,97 @@ $peliculas = $conexion->query("SELECT id, titulo FROM peliculas ORDER BY titulo"
     <?php endif; ?>
 
     <div class="admin-form-card">
-        <h3>Agregar Horario</h3>
-        <form action="../controllers/AdminHorariosController.php" method="POST">
-            <input type="hidden" name="accion" value="agregar">
-            <div class="form-row">
-                <div class="form-group" style="flex:2">
-                    <label>Película</label>
-                    <select name="pelicula_id" required>
-                        <option value="">— Seleccionar —</option>
-                        <?php foreach ($peliculas as $p): ?>
-                            <option value="<?= $p['id'] ?>"><?= htmlspecialchars($p['titulo']) ?></option>
-                        <?php endforeach; ?>
-                    </select>
+        <?php if ($editando): ?>
+            <h3>✏️ Editando Horario #<?= $editando['id'] ?></h3>
+            <form action="../controllers/AdminHorariosController.php" method="POST">
+                <input type="hidden" name="accion" value="editar">
+                <input type="hidden" name="id" value="<?= $editando['id'] ?>">
+                <div class="form-row">
+                    <div class="form-group" style="flex:2">
+                        <label>Película</label>
+                        <select name="pelicula_id" required>
+                            <?php foreach ($peliculas as $p): ?>
+                                <option value="<?= $p['id'] ?>" <?= $editando['pelicula_id'] == $p['id'] ? 'selected' : '' ?>><?= htmlspecialchars($p['titulo']) ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Hora</label>
+                        <select name="hora" required>
+                            <?php
+                            $editHora = date('H:i', strtotime($editando['hora']));
+                            for($h=10; $h<=23; $h++) {
+                                foreach(['00', '15', '30', '45'] as $m) {
+                                    $timeVal = sprintf("%02d:%s", $h, $m);
+                                    $sel = ($timeVal === $editHora) ? 'selected' : '';
+                                    echo "<option value=\"$timeVal\" $sel>$timeVal hrs</option>";
+                                }
+                            }
+                            ?>
+                        </select>
+                    </div>
                 </div>
-                <div class="form-group"><label>Hora</label><input type="time" name="hora" required></div>
-            </div>
-            <div class="form-row">
-                <div class="form-group"><label>Precio ($)</label><input type="number" step="0.01" name="precio" value="75.00" required></div>
-                <div class="form-group"><label>Sala</label><input type="text" name="sala" value="Sala 1" required></div>
-                <div class="form-group"><label>Asientos Totales</label><input type="number" name="asientos_totales" value="60" required></div>
-            </div>
-            <button type="submit" class="btn-pagar" style="margin-top:10px;">+ Agregar Horario</button>
-        </form>
+                <div class="form-row">
+                    <div class="form-group"><label>Precio ($)</label><input type="number" step="0.01" name="precio" value="<?= $editando['precio'] ?>" required></div>
+                    <div class="form-group">
+                        <label>Sala</label>
+                        <select name="sala" id="sala-select" onchange="document.getElementById('asientos-input').value = this.options[this.selectedIndex].dataset.asientos" required>
+                            <?php foreach ($salas as $nombre => $asientos): ?>
+                                <option value="<?= $nombre ?>" data-asientos="<?= $asientos ?>" <?= $editando['sala'] === $nombre ? 'selected' : '' ?>><?= $nombre ?> (<?= $asientos ?> lugares)</option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                    <div class="form-group"><label>Asientos Totales</label><input type="number" name="asientos_totales" id="asientos-input" value="<?= $editando['asientos_totales'] ?>" readonly style="background:var(--bg-secondary); cursor:not-allowed;"></div>
+                </div>
+                <div style="display:flex; gap:10px; margin-top:10px;">
+                    <button type="submit" class="btn-pagar">💾 Guardar Cambios</button>
+                    <a href="adminHorarios.php" class="btn-vaciar" style="text-decoration:none; text-align:center; line-height:2.5;">Cancelar</a>
+                </div>
+            </form>
+        <?php else: ?>
+            <h3>Agregar Horario</h3>
+            <form action="../controllers/AdminHorariosController.php" method="POST">
+                <input type="hidden" name="accion" value="agregar">
+                <div class="form-row">
+                    <div class="form-group" style="flex:2">
+                        <label>Película</label>
+                        <select name="pelicula_id" required>
+                            <option value="">— Seleccionar —</option>
+                            <?php foreach ($peliculas as $p): ?>
+                                <option value="<?= $p['id'] ?>"><?= htmlspecialchars($p['titulo']) ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Hora</label>
+                        <select name="hora" required>
+                            <option value="">— Seleccionar —</option>
+                            <?php
+                            for($h=10; $h<=23; $h++) {
+                                foreach(['00', '15', '30', '45'] as $m) {
+                                    $timeVal = sprintf("%02d:%s", $h, $m);
+                                    echo "<option value=\"$timeVal\">$timeVal hrs</option>";
+                                }
+                            }
+                            ?>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label>Precio ($)</label><input type="number" step="0.01" name="precio" value="70.00" required></div>
+                    <div class="form-group">
+                        <label>Sala</label>
+                        <select name="sala" id="sala-select" onchange="document.getElementById('asientos-input').value = this.options[this.selectedIndex].dataset.asientos" required>
+                            <?php foreach ($salas as $nombre => $asientos): ?>
+                                <option value="<?= $nombre ?>" data-asientos="<?= $asientos ?>"><?= $nombre ?> (<?= $asientos ?> lugares)</option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                    <div class="form-group"><label>Asientos Totales</label><input type="number" name="asientos_totales" id="asientos-input" value="60" readonly style="background:var(--bg-secondary); cursor:not-allowed;"></div>
+                </div>
+                <button type="submit" class="btn-pagar" style="margin-top:10px;">+ Agregar Horario</button>
+            </form>
+        <?php endif; ?>
     </div>
 
     <table class="data-table" style="margin-top:24px;">
@@ -85,8 +167,11 @@ $peliculas = $conexion->query("SELECT id, titulo FROM peliculas ORDER BY titulo"
                 <td>$<?= number_format($h['precio'], 2) ?></td>
                 <td><?= htmlspecialchars($h['sala']) ?></td>
                 <td><?= $h['asientos_totales'] ?></td>
-                <td><a href="../controllers/AdminHorariosController.php?accion=eliminar&id=<?= $h['id'] ?>" class="btn-delete"
-                       onclick="return confirm('¿Eliminar este horario?')">Eliminar</a></td>
+                <td class="actions-cell">
+                    <a href="adminHorarios.php?editar=<?= $h['id'] ?>" class="btn-edit">Editar</a>
+                    <a href="../controllers/AdminHorariosController.php?accion=eliminar&id=<?= $h['id'] ?>" class="btn-delete"
+                       onclick="return confirm('¿Eliminar este horario?')">Eliminar</a>
+                </td>
             </tr>
         <?php endforeach; ?>
         </tbody>

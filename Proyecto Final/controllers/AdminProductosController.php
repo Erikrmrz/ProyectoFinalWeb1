@@ -30,6 +30,29 @@ if ($accion === 'agregar' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     exit();
 }
 
+// EDITAR PRODUCTO
+if ($accion === 'editar' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+    $id     = (int)$_POST['id'];
+    $nombre = trim($_POST['nombre']);
+    $precio = (float)$_POST['precio'];
+    $stock  = (int)$_POST['stock'];
+
+    // Si se sube nueva imagen, actualizarla; si no, dejar la anterior
+    if (isset($_FILES['imagen']) && $_FILES['imagen']['error'] === UPLOAD_ERR_OK) {
+        $imagen_blob   = file_get_contents($_FILES['imagen']['tmp_name']);
+        $imagen_tipo   = $_FILES['imagen']['type'];
+        $imagen_nombre = $_FILES['imagen']['name'];
+        $stmt = $conexion->prepare("UPDATE productos SET nombre=?, precio=?, stock=?, imagen=?, imagen_blob=?, imagen_tipo=? WHERE id=?");
+        $stmt->execute([$nombre, $precio, $stock, $imagen_nombre, $imagen_blob, $imagen_tipo, $id]);
+    } else {
+        $stmt = $conexion->prepare("UPDATE productos SET nombre=?, precio=?, stock=? WHERE id=?");
+        $stmt->execute([$nombre, $precio, $stock, $id]);
+    }
+
+    header("Location: ../views/adminPanel.php?ok=producto_editado");
+    exit();
+}
+
 // ELIMINAR PRODUCTO
 if ($accion === 'eliminar' && isset($_GET['id'])) {
     $id = (int)$_GET['id'];

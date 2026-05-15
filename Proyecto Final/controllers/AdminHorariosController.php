@@ -22,6 +22,22 @@ if ($accion === 'agregar' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     exit();
 }
 
+// EDITAR HORARIO
+if ($accion === 'editar' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+    $id               = (int)$_POST['id'];
+    $pelicula_id      = (int)$_POST['pelicula_id'];
+    $hora             = trim($_POST['hora']);
+    $precio           = (float)$_POST['precio'];
+    $sala             = trim($_POST['sala']);
+    $asientos_totales = (int)$_POST['asientos_totales'];
+
+    $stmt = $conexion->prepare("UPDATE horarios SET pelicula_id=?, hora=?, precio=?, sala=?, asientos_totales=? WHERE id=?");
+    $stmt->execute([$pelicula_id, $hora, $precio, $sala, $asientos_totales, $id]);
+
+    header("Location: ../views/adminHorarios.php?ok=horario_editado");
+    exit();
+}
+
 // ELIMINAR HORARIO
 if ($accion === 'eliminar' && isset($_GET['id'])) {
     $id = (int)$_GET['id'];

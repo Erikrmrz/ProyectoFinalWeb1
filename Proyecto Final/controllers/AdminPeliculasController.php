@@ -29,6 +29,27 @@ if ($accion === 'agregar' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     exit();
 }
 
+// EDITAR PELÍCULA
+if ($accion === 'editar' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+    $id            = (int)$_POST['id'];
+    $titulo        = trim($_POST['titulo']);
+    $clasificacion = trim($_POST['clasificacion']);
+
+    if (isset($_FILES['imagen']) && $_FILES['imagen']['error'] === UPLOAD_ERR_OK) {
+        $imagen_blob   = file_get_contents($_FILES['imagen']['tmp_name']);
+        $imagen_tipo   = $_FILES['imagen']['type'];
+        $imagen_nombre = $_FILES['imagen']['name'];
+        $stmt = $conexion->prepare("UPDATE peliculas SET titulo=?, clasificacion=?, imagen=?, imagen_blob=?, imagen_tipo=? WHERE id=?");
+        $stmt->execute([$titulo, $clasificacion, $imagen_nombre, $imagen_blob, $imagen_tipo, $id]);
+    } else {
+        $stmt = $conexion->prepare("UPDATE peliculas SET titulo=?, clasificacion=? WHERE id=?");
+        $stmt->execute([$titulo, $clasificacion, $id]);
+    }
+
+    header("Location: ../views/adminPeliculas.php?ok=pelicula_editada");
+    exit();
+}
+
 // ELIMINAR PELÍCULA (cascade elimina horarios)
 if ($accion === 'eliminar' && isset($_GET['id'])) {
     $id = (int)$_GET['id'];
