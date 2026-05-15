@@ -46,3 +46,36 @@ CREATE TABLE IF NOT EXISTS ventas_detalles (
     FOREIGN KEY (venta_id) REFERENCES ventas(id) ON DELETE CASCADE,
     FOREIGN KEY (producto_id) REFERENCES productos(id) ON DELETE CASCADE
 );
+
+-- ========================================================
+-- NUEVAS TABLAS PARA LA CARTELERA Y HORARIOS
+-- ========================================================
+
+CREATE TABLE IF NOT EXISTS peliculas (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    titulo VARCHAR(255) NOT NULL,
+    imagen VARCHAR(255) NOT NULL,
+    clasificacion VARCHAR(10) NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS horarios (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    pelicula_id INT NOT NULL,
+    hora TIME NOT NULL,
+    FOREIGN KEY (pelicula_id) REFERENCES peliculas(id) ON DELETE CASCADE
+);
+
+-- Insertar datos iniciales de las películas
+INSERT INTO peliculas (id, titulo, imagen, clasificacion) VALUES
+(1, 'Deadpool & Wolverine', 'https://via.placeholder.com/250x350/1a365d/fff?text=Deadpool', 'C'),
+(2, 'Intensa-Mente 2', 'https://via.placeholder.com/250x350/1a365d/fff?text=Intensa-Mente+2', 'AA'),
+(3, 'Mi Villano Favorito 4', 'https://via.placeholder.com/250x350/1a365d/fff?text=Villano+Fav+4', 'A'),
+(4, 'Un Lugar en Silencio: Día Uno', 'https://via.placeholder.com/250x350/1a365d/fff?text=Lugar+Silencio', 'B15')
+ON DUPLICATE KEY UPDATE titulo=VALUES(titulo);
+
+-- Insertar los horarios correspondientes en formato HH:MM:SS
+INSERT INTO horarios (pelicula_id, hora) VALUES
+(1, '14:30:00'), (1, '17:00:00'), (1, '19:45:00'), (1, '22:15:00'),
+(2, '13:00:00'), (2, '15:20:00'), (2, '18:10:00'),
+(3, '12:45:00'), (3, '16:15:00'), (3, '18:40:00'),
+(4, '20:00:00'), (4, '22:30:00');

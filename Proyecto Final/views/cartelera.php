@@ -1,15 +1,24 @@
 <?php
 session_start();
+// Importamos la conexión de base de datos existente
+require_once '../config/database.php';
+
 $isLoggedIn = isset($_SESSION['rol']) && $_SESSION['rol'] === 'cliente';
 $username = $isLoggedIn ? htmlspecialchars($_SESSION['username']) : 'Invitado';
 
-// Simulamos una base de datos de películas (Puedes pasarlo a MySQL después)
-$peliculas = [
-    ["titulo" => "Deadpool & Wolverine", "imagen" => "https://via.placeholder.com/250x350/1a365d/fff?text=Deadpool", "clasificacion" => "C", "horarios" => ["14:30", "17:00", "19:45", "22:15"]],
-    ["titulo" => "Intensa-Mente 2", "imagen" => "https://via.placeholder.com/250x350/1a365d/fff?text=Intensa-Mente+2", "clasificacion" => "AA", "horarios" => ["13:00", "15:20", "18:10"]],
-    ["titulo" => "Mi Villano Favorito 4", "imagen" => "https://via.placeholder.com/250x350/1a365d/fff?text=Villano+Fav+4", "clasificacion" => "A", "horarios" => ["12:45", "16:15", "18:40"]],
-    ["titulo" => "Un Lugar en Silencio: Día Uno", "imagen" => "https://via.placeholder.com/250x350/1a365d/fff?text=Lugar+Silencio", "clasificacion" => "B15", "horarios" => ["20:00", "22:30"]],
-];
+// Consulta SQL dinámicamente uniendo películas y concatenando sus horarios
+try {
+    $query = "SELECT p.id, p.titulo, p.imagen, p.clasificacion, 
+                     GROUP_CONCAT(TIME_FORMAT(h.hora, '%H:%i') ORDER BY h.hora SEPARATOR ',') as horarios_lista
+              FROM peliculas p
+              LEFT JOIN horarios h ON p.id = h.pelicula_id
+              GROUP BY p.id 
+              ORDER BY p.id ASC";
+    $stmt = $conexion->query($query);
+    $peliculas = $stmt->fetchAll(PDO::FETCH_ASSOC);
+} catch (PDOException $e) {
+    die("Error al cargar la cartelera de la base de datos: " . $e->getMessage());
+}
 ?>
 <!DOCTYPE html>
 <html lang="es" data-theme="dark">
@@ -33,9 +42,7 @@ $peliculas = [
         </div>
 
         <div class="header-actions">
-            <span class="header-user">Hola,
-                <?= $username ?>
-            </span>
+            <span class="header-user">Hola, <?= $username ?></span>
             <div class="theme-switch-wrapper">
                 <label class="theme-switch" title="Cambiar tema">
                     <input type="checkbox" id="themeToggle">
@@ -53,22 +60,26 @@ $peliculas = [
     <main class="cartelera-section">
         <h1>En Cartelera</h1>
         <div class="grid-peliculas">
-            <?php foreach ($peliculas as $peli): ?>
+            <?php foreach ($peliculas as $peli):
+                // Convertimos la cadena de horarios separados por comas de la BD en un array de PHP
+                $horarios = !empty($peli['horarios_lista']) ? explode(',', $peli['horarios_lista']) : [];
+                ?>
                 <div class="card-pelicula">
-                    <img src="<?= $peli['imagen'] ?>" alt="<?= htmlspecialchars($peli['titulo']) ?>">
+                    <img src="<?= htmlspecialchars($peli['imagen']) ?>" alt="<?= htmlspecialchars($peli['titulo']) ?>">
                     <div class="pelicula-info">
                         <h3>
-                            <?= htmlspecialchars($peli['titulo']) ?> <span class="badge-clasificacion">
-                                <?= $peli['clasificacion'] ?>
-                            </span>
+                            <?= htmlspecialchars($peli['titulo']) ?>
+                            <span class="badge-clasificacion"><?= htmlspecialchars($peli['clasificacion']) ?></span>
                         </h3>
                         <p class="horarios-titulo">Horarios disponibles:</p>
                         <div class="horarios-container">
-                            <?php foreach ($peli['horarios'] as $hora): ?>
-                                <button class="horario-btn">
-                                    <?= $hora ?>
-                                </button>
-                            <?php endforeach; ?>
+                            <?php if (count($horarios) > 0): ?>
+                                <?php foreach ($horarios as $hora): ?>
+                                    <button class="horario-btn"><?= htmlspecialchars($hora) ?></button>
+                                <?php endforeach; ?>
+                            <?php else: ?>
+                                <p style="font-size: 0.85rem; color: var(--text-muted);">Sin funciones hoy</p>
+                            <?php endif; ?>
                         </div>
                     </div>
                 </div>
