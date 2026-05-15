@@ -2,7 +2,7 @@
 $host = "localhost";
 $dbname = "proyectofinalweb1";
 $username = "root";
-$password = "root";
+$password = "";
 
 try {
     $conexion = new PDO("mysql:host=$host;dbname=$dbname;charset=utf8", $username, $password);
