@@ -1,5 +1,5 @@
 <?php
-// Redirige automáticamente a la tienda
-header("Location: views/clienteTienda.php");
+// Redirige automáticamente a la cartelera (página principal)
+header("Location: views/cartelera.php");
 exit();
 ?>
