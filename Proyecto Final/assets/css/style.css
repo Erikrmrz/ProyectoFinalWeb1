@@ -1111,6 +1111,25 @@ body {
     background: var(--accent);
 }
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 .horario-btn small {
     display: block;
     font-size: 0.7rem;
@@ -1584,12 +1603,25 @@ a.horario-btn {
     color: #fff;
 }
 
-.badge-stock.ok { color: var(--success); }
-.badge-stock.low { color: var(--danger); font-weight: 700; }
+.badge-stock.ok {
+    color: var(--success);
+}
+
+.badge-stock.low {
+    color: var(--danger);
+    font-weight: 700;
+}
 
 @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to   { opacity: 1; transform: translateY(0); }
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .file-input {
